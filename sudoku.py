@@ -1,6 +1,5 @@
 from itertools import chain
 
-
 def read_values(path):
   """
   Read `path` and return `values` string suitable for initializing a `Sudoku` puzzle.
@@ -16,13 +15,14 @@ def replace(s, index, value):
   return ''.join(s[:index] + str(value) + s[index + 1:])
 
 
-def first_candidate(sudoku):
+def next_unset_square(sudoku):
   """
-  Return the first unset 'candidate' square within the sudoku puzzle.
+  Return the 'next unset square' within the sudoku puzzle.
 
+  Squares are ordered by increasing number of candidate values.
   Throws IndexError if no such candidate exists.
   """
-  return sorted(filter(lambda x: x.val is None, chain(*sudoku.squares)), key=lambda x: x.index)[0]
+  return sorted(filter(lambda x: x.val is None, chain(*sudoku.squares)), key=lambda x: len(x.candidates))[0]
 
 
 def solve(sudoku):
@@ -33,9 +33,10 @@ def solve(sudoku):
   if sudoku.solved():
     return sudoku
 
-  sq = first_candidate(sudoku)
+  sq = next_unset_square(sudoku)
   for val in sq.candidates:
     candidate_values = replace(sudoku.values, sq.index, val)
+    print(candidate_values)
     candidate_sudoku = solve(Sudoku(candidate_values))
     if candidate_sudoku is not None:  # found solution
       return candidate_sudoku
@@ -149,7 +150,7 @@ class Sudoku:
     return f'{self.values} solved={self.solved()}'
 
   def __str__(self):
-    return '\n'.join([' '.join([f'{square}' for square in row])
+    return '\n'.join([' '.join([f'{sq}' for sq in row])
         for row in self.squares])
 
 
