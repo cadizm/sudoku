@@ -27,8 +27,11 @@ def next_unset_square(sudoku):
 
 def solve(sudoku):
   """
-  Given a sudoku puzzle, find first unknown square and expand each candidate square into its own
-  sudoku puzzle and recurse until solution found.
+  Given a sudoku puzzle, find `next unset square` and consider each of its candidates as a
+  solution.
+
+  For each puzzle resulting from placing the candidate, recurse (depth-first) and perform the
+  same until a valid solution is found.
   """
   if sudoku.solved():
     return sudoku
@@ -36,9 +39,8 @@ def solve(sudoku):
   sq = next_unset_square(sudoku)
   for val in sq.candidates:
     candidate_values = replace(sudoku.values, sq.index, val)
-    print(candidate_values)
     candidate_sudoku = solve(Sudoku(candidate_values))
-    if candidate_sudoku is not None:  # found solution
+    if candidate_sudoku is not None:
       return candidate_sudoku
 
 
@@ -100,7 +102,7 @@ class Square:
 
 class Sudoku:
   """
-  Representation of a `Sudoku` puzzle made up 81 `Square`'s.
+  Representation of a `Sudoku` puzzle made up of a 9x9 grid of `Square`'s.
 
   `values` is an 81 character string used to initialize the puzzle.
   `squares` is the two-dimensional array (9x9) of `Square`'s representing the puzzle grid.
@@ -109,10 +111,10 @@ class Sudoku:
     assert len(values) == 81
     self.values = values
     self.squares = []
-    for i in range(9):  # init squares
+    for i in range(9):
       start, end = i * 9, i * 9 + 9
-      self.squares.append([Square(start + index, int(c) if c != '.' else None) \
-          for index, c in enumerate(values[start:end])])
+      self.squares.append([Square(start + j, int(val) if val != '.' else None) \
+          for j, val in enumerate(values[start:end])])
     for sq in chain(*self.squares):
       sq.candidates = self.candidates(sq)
 
@@ -122,7 +124,7 @@ class Sudoku:
     """
     incomplete = lambda x: set(range(1, 10)) - set([sq.val for sq in x]) != set()
     for sq in chain(*self.squares):
-      if any(map(incomplete, self.rcb(sq))):
+      if any(map(incomplete, self.group(sq))):
         return False
     return True
 
@@ -133,13 +135,13 @@ class Sudoku:
     """
     if sq.val is not None:
       return []
-    return list(set(range(1, 10)) - set(map(lambda x: x.val, chain(*self.rcb(sq)))))
+    return list(set(range(1, 10)) - set(map(lambda x: x.val, chain(*self.group(sq)))))
 
-  def rcb(self, sq):
+  def group(self, sq):
     """
-    Return a 3-tuple of the `(row, column, box)` that square `sq` belongs to.
+    Return a 3-tuple of the `(row, column, box)` 'group' that square `sq` belongs to.
 
-    Useful for determining candiates for `sq` or whether this `Sudoku` is valid/solved.
+    Useful for determining candiates for `sq` and whether this `Sudoku` is valid/solved.
     """
     row = [self.squares[sq.index // 9][x] for x in range(9)]
     col = [self.squares[x][sq.index % 9] for x in range(9)]
