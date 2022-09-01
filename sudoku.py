@@ -1,12 +1,5 @@
 from itertools import chain
 
-def read_values(path):
-  """
-  Read `path` and return `values` string suitable for initializing a `Sudoku` puzzle.
-  """
-  return ''.join(list(map(lambda x: x.strip(), open(path).readlines()))).replace(' ', '')
-
-
 def replace(s, index, value):
   """
   Replace a single character within string `s` and return it.
@@ -157,7 +150,7 @@ class Sudoku:
 
 
 if __name__ == '__main__':
-  sudoku = Sudoku(read_values('hard.txt'))
+  sudoku = Sudoku('.8.172..429...6..86.7.8.23.8...45..6.6..3154...276.1..9..4..851.23.......4.6.7..9')
   print(f'{sudoku}\n{repr(sudoku)}')
 
   solution = solve(sudoku)
