@@ -1,3 +1,4 @@
+import os
 from itertools import chain
 
 def replace(s, index, value):
@@ -32,6 +33,7 @@ def solve(sudoku):
   sq = next_unset_square(sudoku)
   for val in sq.candidates:
     candidate_values = replace(sudoku.values, sq.index, val)
+    if os.environ.get('DEBUG'): print(candidate_values)
     candidate_sudoku = solve(Sudoku(candidate_values))
     if candidate_sudoku is not None:
       return candidate_sudoku
